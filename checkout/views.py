@@ -3,8 +3,8 @@ from django.contrib import messages
 from django.conf import settings
 
 from .forms import OrderForm
-from products.models import Product
 from .models import Order, OrderLineItem
+from products.models import Product
 from bag.contexts import bag_contents
 
 import stripe
@@ -14,7 +14,7 @@ def checkout(request):
     stripe_public_key = settings.STRIPE_PUBLIC_KEY
     stripe_secret_key = settings.STRIPE_SECRET_KEY
 
-    if request.method == "POST":
+    if request.method == 'POST':
         bag = request.session.get('bag', {})
 
         form_data = {
@@ -52,7 +52,7 @@ def checkout(request):
                             order_line_item.save()
                 except Product.DoesNotExist:
                     messages.error(request, (
-                        "One of the products in your bag wasn't found in our database."
+                        "One of the products in your bag wasn't found in our database. "
                         "Please call us for assistance!")
                     )
                     order.delete()
@@ -62,11 +62,11 @@ def checkout(request):
             return redirect(reverse('checkout_success', args=[order.order_number]))
         else:
             messages.error(request, 'There was an error with your form. \
-            Please double check your information')
+                Please double check your information.')
     else:
         bag = request.session.get('bag', {})
         if not bag:
-            messages.error(request, 'theres nothing in your bag at the moment')
+            messages.error(request, "There's nothing in your bag at the moment")
             return redirect(reverse('products'))
 
         current_bag = bag_contents(request)
@@ -82,7 +82,7 @@ def checkout(request):
 
     if not stripe_public_key:
         messages.warning(request, 'Stripe public key is missing. \
-            Did you forget to set it in your enviroment?')
+            Did you forget to set it in your environment?')
 
     template = 'checkout/checkout.html'
     context = {
@@ -102,7 +102,7 @@ def checkout_success(request, order_number):
     order = get_object_or_404(Order, order_number=order_number)
     messages.success(request, f'Order successfully processed! \
         Your order number is {order_number}. A confirmation \
-            email will be sent to {order.email}.')
+        email will be sent to {order.email}.')
 
     if 'bag' in request.session:
         del request.session['bag']
